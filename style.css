@@ -1,69 +1,44 @@
 body {
-  font-family: "Times New Roman", Times, serif;
-  font-weight: bold;
-  background: #f1f5f9;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f7f6;
   margin: 0;
-  padding: 10px;
+  padding: 15px;
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+#cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
 }
 
 .card {
   background: white;
-  border-radius: 14px;
-  padding: 12px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  border: 2px solid transparent;
-}
-
-.card h2 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 6px;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.row span {
-  width: 45%;
-  font-size: 14px;
-}
-
-.row select {
-  width: 55%;
-  padding: 6px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-family: "Times New Roman", Times, serif;
-  font-weight: bold;
-}
-
-/* Culori pentru starea zilei */
-.card.ieri {
-  border: 2px solid #f87171;
-  background: #fef2f2;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .card.azi {
   border: 2px solid #22c55e;
-  background: #ecfdf5;
 }
 
-.card.maine {
-  border: 2px solid #60a5fa;
-  background: #eff6ff;
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 5px;
 }
 
-/* Force Bold pe iOS/Android */
-select option {
-  font-weight: bold;
+select {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  width: 160px;
 }

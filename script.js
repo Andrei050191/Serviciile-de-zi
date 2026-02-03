@@ -13,14 +13,13 @@ const db = getFirestore(app);
 const ref = doc(db, "servicii", "calendar");
 
 // --- LOGICA ACCES ---
-const COD_CORECT = "4321"; // MODIFICĂ AICI CODUL DORIT
+const COD_CORECT = "1234"; 
 const loginScreen = document.getElementById('login-screen');
 const mainContent = document.getElementById('main-content');
 const pinInput = document.getElementById('pin-input');
 const loginBtn = document.getElementById('login-btn');
 const errorMsg = document.getElementById('error-msg');
 
-// Verifică dacă a fost deja logat
 if (localStorage.getItem('acces_aprobat') === 'true') {
   afiseazaAplicatia();
 }
@@ -38,7 +37,6 @@ loginBtn.onclick = () => {
 function afiseazaAplicatia() {
   loginScreen.style.display = 'none';
   mainContent.style.display = 'block';
-  // Pornim ascultarea bazei de date doar după login
   onSnapshot(ref, (snap) => {
     const data = snap.exists() ? snap.data().data || {} : {};
     randare(data);
@@ -100,30 +98,26 @@ function randare(storage) {
     else if (zi === aziStr) { card.classList.add("azi"); eticheta = " (AZI)"; }
     else if (zi === maineStr) { card.classList.add("maine"); eticheta = " (MÂINE)"; }
 
-    card.innerHTML = `<h2>📅 ${zi}${eticheta}</h2>`;
+    // TITLUL CARDULUI CU STEMĂ
+    card.innerHTML = `
+      <h2 style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Coat_of_arms_of_Moldova.svg/100px-Coat_of_arms_of_Moldova.svg.png" style="width: 25px; height: auto;">
+        ${zi}${eticheta}
+      </h2>`;
 
     functii.forEach((f, indexFunctie) => {
       const row = document.createElement("div");
       row.className = "row";
       row.innerHTML = `<span>${f}</span>`;
-
       const select = document.createElement("select");
       select.add(new Option("Din altă subunitate", "Din altă subunitate"));
-
-      (reguliServicii[f] || []).forEach(p => {
-        if (p !== "Din altă subunitate") select.add(new Option(p, p));
-      });
-
+      (reguliServicii[f] || []).forEach(p => { if (p !== "Din altă subunitate") select.add(new Option(p, p)); });
       select.value = storage?.[zi]?.[indexFunctie] || "Din altă subunitate";
-
       select.onchange = () => {
-        if (!storage[zi]) {
-          storage[zi] = new Array(functii.length).fill("Din altă subunitate");
-        }
+        if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
         storage[zi][indexFunctie] = select.value;
         salveaza(storage);
       };
-
       row.appendChild(select);
       card.appendChild(row);
     });
