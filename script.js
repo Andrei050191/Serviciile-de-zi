@@ -1,13 +1,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// CONFIGURARE FIREBASE
+// CONFIGURATIA FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyDapdObzYLSBHMzq9bJzp3CvJfKgAfao",
   authDomain: "servicii-de-zi.firebaseapp.com",
   projectId: "servicii-de-zi"
 };
 
+// INITIALIZARE
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const ref = doc(db, "servicii", "calendar");
@@ -20,7 +21,9 @@ const persoane = [
   "sold.I Pinzari Vladimir", "sold.II Cucer Oxana", "sold.III Roler Ira", "sold.III Vovc Dan"
 ];
 
-const functii = ["Ajutor OSU", "Sergent de serviciu PCT", "Planton", "Patrulă", "Operator radio", "Intervenția 1", "Intervenția 2"];
+const functii = [
+  "Ajutor OSU", "Sergent de serviciu PCT", "Planton", "Patrulă", "Operator radio", "Intervenția 1", "Intervenția 2"
+];
 
 const reguliServicii = {
   "Ajutor OSU": ["lt.col. Bordea Andrei", "lt. Bodiu Sergiu", "lt. Dermindje Mihail", "lt. Samoschin Anton"],
@@ -32,6 +35,7 @@ const reguliServicii = {
   "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate")
 };
 
+// Generează 7 zile începând de ieri
 function genereazaZile() {
   const zile = [];
   const azi = new Date();
@@ -43,60 +47,60 @@ function genereazaZile() {
   return zile;
 }
 
-const zile = genereazaZile();
+const zileAfisate = genereazaZile();
 const container = document.getElementById("cards");
 
-onSnapshot(ref, snap => {
+// Ascultă modificările în timp real
+onSnapshot(ref, (snap) => {
   const data = snap.exists() ? snap.data().data || {} : {};
   randare(data);
 });
 
-async function salveaza(data) {
-  try {
-    await setDoc(ref, { data }, { merge: true });
-  } catch (e) {
-    console.error("Eroare la salvare:", e);
-  }
+async function salveaza(toateDatele) {
+  await setDoc(ref, { data: toateDatele }, { merge: true });
 }
 
 function randare(storage) {
   container.innerHTML = "";
+  
   const aziStr = new Date().toLocaleDateString("ro-RO");
   const ieriStr = new Date(Date.now() - 86400000).toLocaleDateString("ro-RO");
   const maineStr = new Date(Date.now() + 86400000).toLocaleDateString("ro-RO");
 
-  zile.forEach(zi => {
+  zileAfisate.forEach(zi => {
     const card = document.createElement("div");
     card.className = "card";
     
-    // Aplicare culori din CSS
     if (zi === ieriStr) card.classList.add("ieri");
-    else if (zi === aziStr) card.classList.add("azi");
-    else if (zi === maineStr) card.classList.add("maine");
+    if (zi === aziStr) card.classList.add("azi");
+    if (zi === maineStr) card.classList.add("maine");
 
     card.innerHTML = `<h2>📅 ${zi}</h2>`;
 
-    functii.forEach((f, i) => {
+    functii.forEach((f, indexFunctie) => {
       const row = document.createElement("div");
       row.className = "row";
       row.innerHTML = `<span>${f}</span>`;
 
       const select = document.createElement("select");
       
-      // Adaugă opțiunea default
-      const optDefault = new Option("Din altă subunitate", "Din altă subunitate");
-      select.add(optDefault);
+      // Opțiunea default
+      select.add(new Option("Din altă subunitate", "Din altă subunitate"));
 
-      // Adaugă persoanele conform regulilor
+      // Filtrare persoane conform regulilor
       (reguliServicii[f] || []).forEach(p => {
-        if(p !== "Din altă subunitate") select.add(new Option(p, p));
+        if (p !== "Din altă subunitate") select.add(new Option(p, p));
       });
 
-      select.value = storage?.[zi]?.[i] || "Din altă subunitate";
+      // Încărcare valoare salvată
+      select.value = storage?.[zi]?.[indexFunctie] || "Din altă subunitate";
 
+      // Salvare la schimbare
       select.onchange = () => {
-        if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
-        storage[zi][i] = select.value;
+        if (!storage[zi]) {
+          storage[zi] = new Array(functii.length).fill("Din altă subunitate");
+        }
+        storage[zi][indexFunctie] = select.value;
         salveaza(storage);
       };
 
