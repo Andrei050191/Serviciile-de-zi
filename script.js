@@ -69,7 +69,6 @@ const persoane = [
 ];
 
 const functii = [
-
   "Ajutor OSU", 
   "Sergent de serviciu PCT", 
   "Planton", "Patrulă", 
@@ -107,7 +106,6 @@ const reguliServicii = {
   ],
   "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
   "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
-
   "Responsabil": [
     "lt.col. Bordea Andrei"
   ]
@@ -141,12 +139,19 @@ function randare(storage) {
   zileAfisate.forEach(zi => {
     const card = document.createElement("div");
     card.className = "card";
+    
+    // EXTRAGEM ZIUA SĂPTĂMÂNII
+    const parti = zi.split('.');
+    const dataObiect = new Date(parti[2], parti[1] - 1, parti[0]);
+    const numeZi = dataObiect.toLocaleDateString("ro-RO", { weekday: 'long' });
+    const ziSaptamana = numeZi.charAt(0).toUpperCase() + numeZi.slice(1);
+
     let eticheta = "";
     if (zi === ieriStr) { card.classList.add("ieri"); eticheta = " (IERI)"; }
     else if (zi === aziStr) { card.classList.add("azi"); eticheta = " (AZI)"; }
     else if (zi === maineStr) { card.classList.add("maine"); eticheta = " (MÂINE)"; }
 
-    card.innerHTML = `<h2>📅 ${zi}${eticheta}</h2>`;
+    card.innerHTML = `<h2>📅 ${ziSaptamana}, ${zi}${eticheta}</h2>`;
 
     functii.forEach((f, indexFunctie) => {
       const row = document.createElement("div");
