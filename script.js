@@ -51,7 +51,8 @@ const functii = [
   "Patrulă",
   "Operator radio",
   "Intervenția 1",
-  "Intervenția 2"
+  "Intervenția 2",
+  "Responsabil"
 ];
 
 /* =========================
@@ -89,11 +90,15 @@ const reguliServicii = {
   ],
 
   "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
-  "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate")
+  "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
+
+  "Responsabil": [
+    "lt.col. Bordea Andrei"
+  ]
 };
 
 /* =========================
-   CALENDAR — 7 ZILE
+   CALENDAR – 7 ZILE (IERI + 5)
 ========================= */
 function genereazaZile() {
   const zile = [];
@@ -104,7 +109,13 @@ function genereazaZile() {
   for (let i = 0; i < 7; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
-    zile.push(d.toLocaleDateString("ro-RO"));
+    zile.push(
+      d.toLocaleDateString("ro-RO", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      })
+    );
   }
   return zile;
 }
@@ -112,7 +123,7 @@ function genereazaZile() {
 const zile = genereazaZile();
 
 /* =========================
-   SALVARE SIGURĂ
+   SALVARE SIGURĂ (fără undefined)
 ========================= */
 async function salveazaCurat(data) {
   const curat = JSON.parse(JSON.stringify(data));
@@ -147,7 +158,7 @@ function randare(storage = {}) {
       optDefault.textContent = "Din altă subunitate";
       select.appendChild(optDefault);
 
-      // persoane PERMISE
+      // persoane permise pentru serviciu
       (reguliServicii[functie] || []).forEach(p => {
         const opt = document.createElement("option");
         opt.value = p;
@@ -155,15 +166,17 @@ function randare(storage = {}) {
         select.appendChild(opt);
       });
 
+      // valoare curentă
       select.value = storage?.[zi]?.[idx] || "Din altă subunitate";
 
+      // schimbare
       select.onchange = async () => {
         storage[zi] = storage[zi] || [];
 
-        // verificare dublură (exceptând „Din altă subunitate”)
+        // verificare: aceeași persoană NU poate avea 2 servicii în aceeași zi
         if (
           select.value !== "Din altă subunitate" &&
-          storage[zi].includes(select.value)
+          storage[zi].some((p, i) => i !== idx && p === select.value)
         ) {
           alert("⚠️ Această persoană este deja la un serviciu în această zi!");
           select.value = "Din altă subunitate";
@@ -188,7 +201,7 @@ function randare(storage = {}) {
 ========================= */
 randare({});
 
-/* ========================
+/* =========================
    FIREBASE LIVE SYNC
 ========================= */
 onSnapshot(ref, snap => {
