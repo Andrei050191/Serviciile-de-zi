@@ -108,6 +108,9 @@ const zile = genereazaZile();
 ========================= */
 const container = document.getElementById("cards");
 
+// AFIȘARE IMEDIATĂ (fără date)
+randare({});
+
 onSnapshot(ref, snap => {
   const data = snap.exists() ? snap.data().data || {} : {};
   randare(data);
