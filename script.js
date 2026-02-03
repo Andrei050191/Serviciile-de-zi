@@ -132,7 +132,7 @@ function randare(storage) {
           const esteDejaAzi = serviciiAzi.some((nume, idx) => nume === nouaPersoana && idx !== indexFunctie);
 
           if (esteDejaAzi) {
-            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) la o altă funcție în această zi!`);
+            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) la alt serviciu în această zi!`);
             select.value = valoareSalvata;
             return;
           }
