@@ -1,77 +1,127 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
+  getFirestore,
   doc,
   setDoc,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const db = window.db;
+/* =========================
+   FIREBASE – AICI, NU ÎN HTML
+========================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyDapdObzYLSBHMzq9bJzp3CvJfKgAfao",
+  authDomain: "servicii-de-zi.firebaseapp.com",
+  projectId: "servicii-de-zi"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const ref = doc(db, "servicii", "calendar");
+
+/* =========================
+   DATE
+========================= */
+const persoane = [
+  "Din altă subunitate",
+  "lt.col. Bordea Andrei",
+  "lt. Bodiu Sergiu",
+  "lt. Dermindje Mihail",
+  "lt. Samoschin Anton",
+  "sg.II Plugaru Iurie",
+  "sg.III Botnari Anastasia",
+  "sg.III Murafa Oleg",
+  "sg.III Ungureanu Andrei",
+  "sg.III Zamaneagra Aliona",
+  "cap. Boțoc Dumitru",
+  "sold.I Macovei Natalia",
+  "sold.I Răileanu Marina",
+  "sold.I Rotari Natalia",
+  "sold.I Smirnov Silvia",
+  "sold.I Tuceacov Nicolae",
+  "sold.I Pinzari Vladimir",
+  "sold.II Cucer Oxana",
+  "sold.III Roler Ira",
+  "sold.III Vovc Dan"
+];
 
 const functii = [
   "Ajutor OSU",
-  "Sergent PCT",
   "Planton",
   "Patrulă",
   "Operator radio",
   "Intervenția 1",
-  "Intervenția 2",
-  "Responsabil"
+  "Intervenția 2"
 ];
 
-function zile7() {
-  const rez = [];
-  const azi = new Date();
+const reguliServicii = {
+  "Ajutor OSU": persoane.filter(p => p.startsWith("lt")),
+  "Planton": persoane.filter(p => p.startsWith("sold")),
+  "Patrulă": persoane.filter(p => p.startsWith("sold")),
+  "Operator radio": persoane.filter(p => p.startsWith("sg")),
+  "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
+  "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate")
+};
 
+/* =========================
+   ZILE – IERI + 6
+========================= */
+function zile7() {
+  const arr = [];
+  const azi = new Date();
   for (let i = -1; i <= 5; i++) {
     const d = new Date(azi);
     d.setDate(azi.getDate() + i);
-    rez.push(d);
+    arr.push(d.toLocaleDateString("ro-RO"));
   }
-  return rez;
+  return arr;
 }
 
+const zile = zile7();
+
+/* =========================
+   UI
+========================= */
 const container = document.getElementById("cards");
 
-function key(d) {
-  return d.toLocaleDateString("ro-RO");
-}
-
-async function save(data) {
-  await setDoc(ref, { data }, { merge: true });
-}
-
-function render(storage = {}) {
+function render(data = {}) {
   container.innerHTML = "";
 
-  zile7().forEach(d => {
-    const k = key(d);
-    const azi = new Date().toDateString();
-
+  zile.forEach(zi => {
     const card = document.createElement("div");
     card.className = "card";
+    card.innerHTML = `<h2>${zi}</h2>`;
 
-    if (d.toDateString() === azi) card.classList.add("azi");
-    if (d < new Date(azi)) card.classList.add("ieri");
-
-    card.innerHTML = `<h2>${k}</h2>`;
-
-    functii.forEach((f, i) => {
+    functii.forEach((f, idx) => {
       const row = document.createElement("div");
       row.className = "row";
 
       const label = document.createElement("span");
       label.textContent = f;
 
-      const input = document.createElement("input");
-      input.value = storage?.[k]?.[i] || "";
+      const select = document.createElement("select");
 
-      input.onchange = async () => {
-        storage[k] = storage[k] || [];
-        storage[k][i] = input.value;
-        await save(storage);
+      const opt0 = document.createElement("option");
+      opt0.value = "Din altă subunitate";
+      opt0.textContent = "Din altă subunitate";
+      select.appendChild(opt0);
+
+      (reguliServicii[f] || []).forEach(p => {
+        const o = document.createElement("option");
+        o.value = p;
+        o.textContent = p;
+        select.appendChild(o);
+      });
+
+      select.value = data?.[zi]?.[idx] || "Din altă subunitate";
+
+      select.onchange = async () => {
+        data[zi] = data[zi] || [];
+        data[zi][idx] = select.value;
+        await setDoc(ref, { data }, { merge: true });
       };
 
-      row.append(label, input);
+      row.append(label, select);
       card.appendChild(row);
     });
 
@@ -79,6 +129,9 @@ function render(storage = {}) {
   });
 }
 
+/* =========================
+   LIVE SYNC
+========================= */
 render({});
 
 onSnapshot(ref, snap => {
