@@ -13,7 +13,7 @@ const db = getFirestore(app);
 const ref = doc(db, "servicii", "calendar");
 
 // --- LOGICA ACCES ---
-const COD_CORECT = "4321"; // PIN-ul tău actualizat
+const COD_CORECT = "4321"; 
 const loginScreen = document.getElementById('login-screen');
 const mainContent = document.getElementById('main-content');
 const pinInput = document.getElementById('pin-input');
@@ -124,31 +124,39 @@ function randare(storage) {
       select.onchange = () => {
         const nouaPersoana = select.value;
 
-        // VERIFICARE 2 ZILE LA RÂND (Dacă nu e "Din altă subunitate")
         if (nouaPersoana !== "Din altă subunitate") {
-          // Calculăm ieri și mâine pentru ziua curentă a cardului
+          
+          // 1. VERIFICARE: SĂ NU FIE DEJA ÎN ALT SERVICIU ÎN ACEEAȘI ZI
+          const serviciiAzi = storage[zi] || [];
+          // Verificăm dacă persoana există deja în alt index din array-ul zilei respective
+          const esteDejaAzi = serviciiAzi.some((nume, idx) => nume === nouaPersoana && idx !== indexFunctie);
+
+          if (esteDejaAzi) {
+            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) la o altă funcție în această zi!`);
+            select.value = valoareSalvata;
+            return;
+          }
+
+          // 2. VERIFICARE: SĂ NU FIE 2 ZILE LA RÂND
           const p = zi.split('.');
           const dCurenta = new Date(p[2], p[1]-1, p[0]);
-          
           const dIeri = new Date(dCurenta); dIeri.setDate(dIeri.getDate() - 1);
           const dMaine = new Date(dCurenta); dMaine.setDate(dMaine.getDate() + 1);
-          
           const sIeri = dIeri.toLocaleDateString("ro-RO");
           const sMaine = dMaine.toLocaleDateString("ro-RO");
 
-          // Verificăm dacă persoana există în orice funcție ieri sau mâine
-          const verifica = (dataString) => {
+          const verificaVecini = (dataString) => {
             return storage[dataString] && Object.values(storage[dataString]).includes(nouaPersoana);
           };
 
-          if (verifica(sIeri) || verifica(sMaine)) {
+          if (verificaVecini(sIeri) || verificaVecini(sMaine)) {
             alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) în ziua precedentă sau următoare!`);
-            select.value = valoareSalvata; // Resetăm vizual
-            return; // Oprim execuția (nu salvăm)
+            select.value = valoareSalvata;
+            return;
           }
         }
 
-        // SALVARE DACĂ VALIDAREA A TRECUT
+        // SALVARE
         if (!storage[zi]) {
           storage[zi] = new Array(functii.length).fill("Din altă subunitate");
         }
