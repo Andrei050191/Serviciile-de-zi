@@ -8,11 +8,23 @@
 </head>
 <body>
 
-  <h1>📅 Serviciile de Zi COA</h1>
+  <div id="login-screen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh;">
+    <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center;">
+      <h1>🔒 Acces Privat</h1>
+      <p style="color: #64748b;">Introdu codul de acces:</p>
+      <input type="password" id="pin-input" pattern="\d*" inputmode="numeric" placeholder="••••" 
+             style="font-size: 24px; width: 120px; text-align: center; padding: 10px; border-radius: 10px; border: 2px solid #cbd5e1; margin-bottom: 20px;">
+      <br>
+      <button id="login-btn" style="width: 100%; padding: 12px; border-radius: 10px; background: #22c55e; color: white; border: none; font-weight: bold; cursor: pointer;">AUTENTIFICARE</button>
+      <p id="error-msg" style="color: #ef4444; display: none; margin-top: 15px; font-size: 14px;">Cod incorect!</p>
+    </div>
+  </div>
 
-  <div id="cards"></div>
+  <div id="main-content" style="display: none;">
+    <h1>📅 Serviciile de Zi COA</h1>
+    <div id="cards"></div>
+  </div>
 
   <script type="module" src="script.js"></script>
-
 </body>
 </html>
