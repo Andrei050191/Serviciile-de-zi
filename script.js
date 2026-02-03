@@ -188,7 +188,7 @@ function randare(storage = {}) {
 ========================= */
 randare({});
 
-/* =========================
+/* ========================
    FIREBASE LIVE SYNC
 ========================= */
 onSnapshot(ref, snap => {
