@@ -22,7 +22,7 @@ const persoane = [
 ];
 
 const functii = [
-  "Ajutor OSU", "Sergent de serviciu PCT", "Planton", "Patrulă", "Operator radio", "Intervenția 1", "Intervenția 2"
+  "Ajutor OSU", "Sergent de serviciu PCT", "Planton", "Patrulă", "Operator radio", "Intervenția 1", "Intervenția 2", "Responsabil"
 ];
 
 const reguliServicii = {
@@ -32,7 +32,8 @@ const reguliServicii = {
   "Patrulă": ["sold.I Tuceacov Nicolae", "sold.III Vovc Dan"],
   "Operator radio": ["sg.III Ungureanu Andrei", "sg.III Botnari Anastasia", "sold.I Smirnov Silvia"],
   "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
-  "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate")
+  "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
+  "Responsabil":["lt.col. Bordea Andrei"]
 };
 
 // Generează 7 zile începând de ieri
