@@ -11,7 +11,7 @@ const db = window.db;
 const ref = doc(db, "servicii", "calendar");
 
 /* =========================
-   DATE STATICE
+   LISTA PERSONAL
 ========================= */
 const persoane = [
   "Din altă subunitate",
@@ -37,11 +37,13 @@ const persoane = [
   "sold.I Pinzari Vladimir",
 
   "sold.II Cucer Oxana",
-
   "sold.III Roler Ira",
   "sold.III Vovc Dan"
 ];
 
+/* =========================
+   SERVICII
+========================= */
 const functii = [
   "Ajutor OSU",
   "Sergent de serviciu PCT",
@@ -53,24 +55,56 @@ const functii = [
 ];
 
 /* =========================
-   CALENDAR – 7 ZILE
+   REGULI PE SERVICII
+========================= */
+const reguliServicii = {
+  "Ajutor OSU": [
+    "lt.col. Bordea Andrei",
+    "lt. Bodiu Sergiu",
+    "lt. Dermindje Mihail",
+    "lt. Samoschin Anton"
+  ],
+
+  "Sergent de serviciu PCT": [
+    "sg.II Plugaru Iurie",
+    "sg.III Murafa Oleg",
+    "sg.III Zamaneagra Aliona",
+    "cap. Boțoc Dumitru"
+  ],
+
+  "Planton": [
+    "sold.II Cucer Oxana",
+    "sold.III Roler Ira"
+  ],
+
+  "Patrulă": [
+    "sold.I Tuceacov Nicolae",
+    "sold.III Vovc Dan"
+  ],
+
+  "Operator radio": [
+    "sg.III Ungureanu Andrei",
+    "sg.III Botnari Anastasia",
+    "sold.I Smirnov Silvia"
+  ],
+
+  "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
+  "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate")
+};
+
+/* =========================
+   CALENDAR — 7 ZILE
 ========================= */
 function genereazaZile() {
   const zile = [];
   const azi = new Date();
   const start = new Date(azi);
-  start.setDate(azi.getDate() - 1); // IERI
+  start.setDate(azi.getDate() - 1);
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
-    zile.push(
-      d.toLocaleDateString("ro-RO", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-      })
-    );
+    zile.push(d.toLocaleDateString("ro-RO"));
   }
   return zile;
 }
@@ -78,12 +112,7 @@ function genereazaZile() {
 const zile = genereazaZile();
 
 /* =========================
-   CONTAINER
-========================= */
-const container = document.getElementById("cards");
-
-/* =========================
-   SALVARE SIGURĂ (fără undefined)
+   SALVARE SIGURĂ
 ========================= */
 async function salveazaCurat(data) {
   const curat = JSON.parse(JSON.stringify(data));
@@ -91,15 +120,16 @@ async function salveazaCurat(data) {
 }
 
 /* =========================
-   RANDARE UI
+   UI
 ========================= */
+const container = document.getElementById("cards");
+
 function randare(storage = {}) {
   container.innerHTML = "";
 
   zile.forEach(zi => {
     const card = document.createElement("div");
     card.className = "card";
-
     card.innerHTML = `<h2>📅 ${zi}</h2>`;
 
     functii.forEach((functie, idx) => {
@@ -117,22 +147,29 @@ function randare(storage = {}) {
       optDefault.textContent = "Din altă subunitate";
       select.appendChild(optDefault);
 
-      // persoane
-      persoane
-        .filter(p => p !== "Din altă subunitate")
-        .forEach(p => {
-          const opt = document.createElement("option");
-          opt.value = p;
-          opt.textContent = p;
-          select.appendChild(opt);
-        });
+      // persoane PERMISE
+      (reguliServicii[functie] || []).forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p;
+        opt.textContent = p;
+        select.appendChild(opt);
+      });
 
-      // valoare curentă
       select.value = storage?.[zi]?.[idx] || "Din altă subunitate";
 
-      // schimbare
       select.onchange = async () => {
         storage[zi] = storage[zi] || [];
+
+        // verificare dublură (exceptând „Din altă subunitate”)
+        if (
+          select.value !== "Din altă subunitate" &&
+          storage[zi].includes(select.value)
+        ) {
+          alert("⚠️ Această persoană este deja la un serviciu în această zi!");
+          select.value = "Din altă subunitate";
+          return;
+        }
+
         storage[zi][idx] = select.value;
         await salveazaCurat(storage);
       };
@@ -147,17 +184,14 @@ function randare(storage = {}) {
 }
 
 /* =========================
-   AFIȘARE INSTANT (FĂRĂ AȘTEPTARE)
+   AFIȘARE INSTANT
 ========================= */
 randare({});
 
 /* =========================
-   FIRESTORE LIVE SYNC
+   FIREBASE LIVE SYNC
 ========================= */
 onSnapshot(ref, snap => {
-  if (!snap.exists()) {
-    randare({});
-  } else {
-    randare(snap.data().data || {});
-  }
+  const data = snap.exists() ? snap.data().data || {} : {};
+  randare(data);
 });
