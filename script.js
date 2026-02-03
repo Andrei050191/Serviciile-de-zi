@@ -4,49 +4,12 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* =========================
-   FIREBASE
-========================= */
 const db = window.db;
 const ref = doc(db, "servicii", "calendar");
 
-/* =========================
-   LISTA PERSONAL
-========================= */
-const persoane = [
-  "Din altă subunitate",
-
-  "lt.col. Bordea Andrei",
-  "lt. Bodiu Sergiu",
-  "lt. Dermindje Mihail",
-  "lt. Samoschin Anton",
-
-  "sg.II Plugaru Iurie",
-  "sg.III Botnari Anastasia",
-  "sg.III Murafa Oleg",
-  "sg.III Ungureanu Andrei",
-  "sg.III Zamaneagra Aliona",
-
-  "cap. Boțoc Dumitru",
-
-  "sold.I Macovei Natalia",
-  "sold.I Răileanu Marina",
-  "sold.I Rotari Natalia",
-  "sold.I Smirnov Silvia",
-  "sold.I Tuceacov Nicolae",
-  "sold.I Pinzari Vladimir",
-
-  "sold.II Cucer Oxana",
-  "sold.III Roler Ira",
-  "sold.III Vovc Dan"
-];
-
-/* =========================
-   SERVICII
-========================= */
 const functii = [
   "Ajutor OSU",
-  "Sergent de serviciu PCT",
+  "Sergent PCT",
   "Planton",
   "Patrulă",
   "Operator radio",
@@ -55,140 +18,60 @@ const functii = [
   "Responsabil"
 ];
 
-/* =========================
-   REGULI PE SERVICII
-========================= */
-const reguliServicii = {
-  "Ajutor OSU": [
-    "lt.col. Bordea Andrei",
-    "lt. Bodiu Sergiu",
-    "lt. Dermindje Mihail",
-    "lt. Samoschin Anton"
-  ],
-
-  "Sergent de serviciu PCT": [
-    "sg.II Plugaru Iurie",
-    "sg.III Murafa Oleg",
-    "sg.III Zamaneagra Aliona",
-    "cap. Boțoc Dumitru"
-  ],
-
-  "Planton": [
-    "sold.II Cucer Oxana",
-    "sold.III Roler Ira"
-  ],
-
-  "Patrulă": [
-    "sold.I Tuceacov Nicolae",
-    "sold.III Vovc Dan"
-  ],
-
-  "Operator radio": [
-    "sg.III Ungureanu Andrei",
-    "sg.III Botnari Anastasia",
-    "sold.I Smirnov Silvia"
-  ],
-
-  "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
-  "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
-
-  "Responsabil": [
-    "lt.col. Bordea Andrei"
-  ]
-};
-
-/* =========================
-   CALENDAR – 7 ZILE (IERI + 5)
-========================= */
-function genereazaZile() {
-  const zile = [];
+function zile7() {
+  const rez = [];
   const azi = new Date();
-  const start = new Date(azi);
-  start.setDate(azi.getDate() - 1);
 
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    zile.push(
-      d.toLocaleDateString("ro-RO", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-      })
-    );
+  for (let i = -1; i <= 5; i++) {
+    const d = new Date(azi);
+    d.setDate(azi.getDate() + i);
+    rez.push(d);
   }
-  return zile;
+  return rez;
 }
 
-const zile = genereazaZile();
-
-/* =========================
-   SALVARE SIGURĂ (fără undefined)
-========================= */
-async function salveazaCurat(data) {
-  const curat = JSON.parse(JSON.stringify(data));
-  await setDoc(ref, { data: curat }, { merge: true });
-}
-
-/* =========================
-   UI
-========================= */
 const container = document.getElementById("cards");
 
-function randare(storage = {}) {
+function key(d) {
+  return d.toLocaleDateString("ro-RO");
+}
+
+async function save(data) {
+  await setDoc(ref, { data }, { merge: true });
+}
+
+function render(storage = {}) {
   container.innerHTML = "";
 
-  zile.forEach(zi => {
+  zile7().forEach(d => {
+    const k = key(d);
+    const azi = new Date().toDateString();
+
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `<h2>📅 ${zi}</h2>`;
 
-    functii.forEach((functie, idx) => {
+    if (d.toDateString() === azi) card.classList.add("azi");
+    if (d < new Date(azi)) card.classList.add("ieri");
+
+    card.innerHTML = `<h2>${k}</h2>`;
+
+    functii.forEach((f, i) => {
       const row = document.createElement("div");
       row.className = "row";
 
       const label = document.createElement("span");
-      label.textContent = functie;
+      label.textContent = f;
 
-      const select = document.createElement("select");
+      const input = document.createElement("input");
+      input.value = storage?.[k]?.[i] || "";
 
-      // opțiune implicită
-      const optDefault = document.createElement("option");
-      optDefault.value = "Din altă subunitate";
-      optDefault.textContent = "Din altă subunitate";
-      select.appendChild(optDefault);
-
-      // persoane permise pentru serviciu
-      (reguliServicii[functie] || []).forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p;
-        opt.textContent = p;
-        select.appendChild(opt);
-      });
-
-      // valoare curentă
-      select.value = storage?.[zi]?.[idx] || "Din altă subunitate";
-
-      // schimbare
-      select.onchange = async () => {
-        storage[zi] = storage[zi] || [];
-
-        // verificare: aceeași persoană NU poate avea 2 servicii în aceeași zi
-        if (
-          select.value !== "Din altă subunitate" &&
-          storage[zi].some((p, i) => i !== idx && p === select.value)
-        ) {
-          alert("⚠️ Această persoană este deja la un serviciu în această zi!");
-          select.value = "Din altă subunitate";
-          return;
-        }
-
-        storage[zi][idx] = select.value;
-        await salveazaCurat(storage);
+      input.onchange = async () => {
+        storage[k] = storage[k] || [];
+        storage[k][i] = input.value;
+        await save(storage);
       };
 
-      row.appendChild(label);
-      row.appendChild(select);
+      row.append(label, input);
       card.appendChild(row);
     });
 
@@ -196,15 +79,8 @@ function randare(storage = {}) {
   });
 }
 
-/* =========================
-   AFIȘARE INSTANT
-========================= */
-randare({});
+render({});
 
-/* =========================
-   FIREBASE LIVE SYNC
-========================= */
 onSnapshot(ref, snap => {
-  const data = snap.exists() ? snap.data().data || {} : {};
-  randare(data);
+  render(snap.exists() ? snap.data().data : {});
 });

@@ -1,48 +1,33 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Servicii de Zi</title>
 
   <!-- CSS -->
   <link rel="stylesheet" href="./style.css">
 
-</head>
-<body>
-
-  <h1>📅 Servicii de Zi</h1>
-
-  <!-- aici JS va genera cardurile -->
-  <div id="cards"></div>
-
-  <!-- =========================
-       FIREBASE CONFIG
-       IMPORTANT: module
-  ========================= -->
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // CONFIGURATIA TA FIREBASE
     const firebaseConfig = {
-      apiKey: "AIzaSyDapdObzYLSBHMzq9bJzp3CvJfKgAfao",
+      apiKey: "AICI_API_KEY_TAU",
       authDomain: "servicii-de-zi.firebaseapp.com",
-      projectId: "servicii-de-zi"
+      projectId: "servicii-de-zi",
     };
 
-    // INITIALIZARE FIREBASE
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // facem db global pentru script.js
-    window.db = db;
+    window.db = getFirestore(app);
   </script>
+</head>
+<body>
 
-  <!-- =========================
-       SCRIPTUL TĂU PRINCIPAL
-  ========================= -->
+  <h1>📅 Servicii de Zi</h1>
+  <div id="cards"></div>
+
+  <!-- JS -->
   <script type="module" src="./script.js"></script>
-
 </body>
 </html>
