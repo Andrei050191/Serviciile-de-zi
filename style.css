@@ -67,3 +67,44 @@ h1 {
 select option {
   font-weight: bold;
 }
+/* Stil pentru subsolul paginii (Footer) */
+footer {
+  text-align: center;
+  margin-top: 50px;
+  padding: 30px 15px;
+  color: #64748b;
+  font-size: 13px;
+  border-top: 1px solid #e2e8f0; /* O linie fină deasupra numelui */
+  line-height: 1.8;
+  background-color: #f8fafc; /* Un fundal foarte ușor gri pentru a-l delimita de carduri */
+  border-radius: 15px 15px 0 0;
+}
+
+footer strong {
+  color: #1e293b;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+footer a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+  display: inline-block; /* Face zona de atingere mai mare pe mobil */
+  padding: 5px;
+}
+
+footer a:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* Ajustare pentru ecrane mici */
+@media (max-width: 480px) {
+  footer {
+    margin-top: 30px;
+    font-size: 12px;
+  }
+}
