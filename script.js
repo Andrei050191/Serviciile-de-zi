@@ -1,12 +1,11 @@
 import {
   doc,
-  getDoc,
   setDoc,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* =========================
-   CONFIG
+   FIREBASE
 ========================= */
 const db = window.db;
 const ref = doc(db, "servicii", "calendar");
@@ -53,50 +52,25 @@ const functii = [
   "Intervenția 2"
 ];
 
-const reguliServicii = {
-  "Ajutor OSU": [
-    "lt.col. Bordea Andrei",
-    "lt. Bodiu Sergiu",
-    "lt. Dermindje Mihail",
-    "lt. Samoschin Anton"
-  ],
-  "Sergent de serviciu PCT": [
-    "sg.II Plugaru Iurie",
-    "sg.III Zamaneagra Aliona",
-    "sg.III Murafa Oleg",
-    "cap. Boțoc Dumitru",
-    "sold.I Pinzari Vladimir"
-  ],
-  "Planton": [
-    "sold.II Cucer Oxana",
-    "sold.III Roler Ira"
-  ],
-  "Patrulă": [
-    "sold.I Tuceacov Nicolae",
-    "sold.III Vovc Dan"
-  ],
-  "Operator radio": [
-    "sg.III Ungureanu Andrei",
-    "sg.III Botnari Anastasia",
-    "sold.I Smirnov Silvia"
-  ],
-  "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
-  "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate")
-};
-
 /* =========================
-   CALENDAR 7 ZILE (IERI →)
+   CALENDAR – 7 ZILE
 ========================= */
 function genereazaZile() {
   const zile = [];
   const azi = new Date();
   const start = new Date(azi);
-  start.setDate(azi.getDate() - 1);
+  start.setDate(azi.getDate() - 1); // IERI
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
-    zile.push(d.toLocaleDateString("ro-RO"));
+    zile.push(
+      d.toLocaleDateString("ro-RO", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      })
+    );
   }
   return zile;
 }
@@ -104,60 +78,63 @@ function genereazaZile() {
 const zile = genereazaZile();
 
 /* =========================
-   FIRESTORE SYNC
+   CONTAINER
 ========================= */
 const container = document.getElementById("cards");
 
-// AFIȘARE IMEDIATĂ (fără date)
-randare({});
-
-onSnapshot(ref, snap => {
-  const data = snap.exists() ? snap.data().data || {} : {};
-  randare(data);
-});
-
-async function salveaza(data) {
-  await setDoc(ref, { data }, { merge: true });
+/* =========================
+   SALVARE SIGURĂ (fără undefined)
+========================= */
+async function salveazaCurat(data) {
+  const curat = JSON.parse(JSON.stringify(data));
+  await setDoc(ref, { data: curat }, { merge: true });
 }
 
 /* =========================
-   UI
+   RANDARE UI
 ========================= */
-function randare(storage) {
+function randare(storage = {}) {
   container.innerHTML = "";
 
   zile.forEach(zi => {
     const card = document.createElement("div");
     card.className = "card";
+
     card.innerHTML = `<h2>📅 ${zi}</h2>`;
 
-    functii.forEach((f, i) => {
+    functii.forEach((functie, idx) => {
       const row = document.createElement("div");
       row.className = "row";
 
       const label = document.createElement("span");
-      label.textContent = f;
+      label.textContent = functie;
 
       const select = document.createElement("select");
 
-      const opt0 = document.createElement("option");
-      opt0.value = "Din altă subunitate";
-      opt0.textContent = "Din altă subunitate";
-      select.appendChild(opt0);
+      // opțiune implicită
+      const optDefault = document.createElement("option");
+      optDefault.value = "Din altă subunitate";
+      optDefault.textContent = "Din altă subunitate";
+      select.appendChild(optDefault);
 
-      (reguliServicii[f] || []).forEach(p => {
-        const o = document.createElement("option");
-        o.value = p;
-        o.textContent = p;
-        select.appendChild(o);
-      });
+      // persoane
+      persoane
+        .filter(p => p !== "Din altă subunitate")
+        .forEach(p => {
+          const opt = document.createElement("option");
+          opt.value = p;
+          opt.textContent = p;
+          select.appendChild(opt);
+        });
 
-      select.value = storage?.[zi]?.[i] || "Din altă subunitate";
+      // valoare curentă
+      select.value = storage?.[zi]?.[idx] || "Din altă subunitate";
 
-      select.onchange = () => {
+      // schimbare
+      select.onchange = async () => {
         storage[zi] = storage[zi] || [];
-        storage[zi][i] = select.value;
-        salveaza(storage);
+        storage[zi][idx] = select.value;
+        await salveazaCurat(storage);
       };
 
       row.appendChild(label);
@@ -168,3 +145,19 @@ function randare(storage) {
     container.appendChild(card);
   });
 }
+
+/* =========================
+   AFIȘARE INSTANT (FĂRĂ AȘTEPTARE)
+========================= */
+randare({});
+
+/* =========================
+   FIRESTORE LIVE SYNC
+========================= */
+onSnapshot(ref, snap => {
+  if (!snap.exists()) {
+    randare({});
+  } else {
+    randare(snap.data().data || {});
+  }
+});
