@@ -33,7 +33,7 @@ const reguliServicii = {
   "Operator radio": ["sg.III Ungureanu Andrei", "sg.III Botnari Anastasia", "sold.I Smirnov Silvia"],
   "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
   "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
-  "Responsabil":["lt.col. Bordea Andrei"]
+  "Responsabil": ["lt.col. Bordea Andrei"]
 };
 
 // Generează 7 zile începând de ieri
@@ -64,19 +64,36 @@ async function salveaza(toateDatele) {
 function randare(storage) {
   container.innerHTML = "";
   
-  const aziStr = new Date().toLocaleDateString("ro-RO");
-  const ieriStr = new Date(Date.now() - 86400000).toLocaleDateString("ro-RO");
-  const maineStr = new Date(Date.now() + 86400000).toLocaleDateString("ro-RO");
+  // Calculare date de referință pentru etichete
+  const acum = new Date();
+  const aziStr = acum.toLocaleDateString("ro-RO");
+  
+  const ieri = new Date();
+  ieri.setDate(acum.getDate() - 1);
+  const ieriStr = ieri.toLocaleDateString("ro-RO");
+
+  const maine = new Date();
+  maine.setDate(acum.getDate() + 1);
+  const maineStr = maine.toLocaleDateString("ro-RO");
 
   zileAfisate.forEach(zi => {
     const card = document.createElement("div");
     card.className = "card";
     
-    if (zi === ieriStr) card.classList.add("ieri");
-    if (zi === aziStr) card.classList.add("azi");
-    if (zi === maineStr) card.classList.add("maine");
+    let eticheta = "";
+    // Adăugare clase CSS și etichete textuale
+    if (zi === ieriStr) {
+      card.classList.add("ieri");
+      eticheta = " (IERI)";
+    } else if (zi === aziStr) {
+      card.classList.add("azi");
+      eticheta = " (AZI)";
+    } else if (zi === maineStr) {
+      card.classList.add("maine");
+      eticheta = " (MÂINE)";
+    }
 
-    card.innerHTML = `<h2>📅 ${zi}</h2>`;
+    card.innerHTML = `<h2>📅 ${zi}${eticheta}</h2>`;
 
     functii.forEach((f, indexFunctie) => {
       const row = document.createElement("div");
@@ -85,19 +102,16 @@ function randare(storage) {
 
       const select = document.createElement("select");
       
-      // Opțiunea default
       select.add(new Option("Din altă subunitate", "Din altă subunitate"));
 
-      // Filtrare persoane conform regulilor
       (reguliServicii[f] || []).forEach(p => {
         if (p !== "Din altă subunitate") select.add(new Option(p, p));
       });
 
-      // Încărcare valoare salvată
       select.value = storage?.[zi]?.[indexFunctie] || "Din altă subunitate";
 
-      // Salvare la schimbare
       select.onchange = () => {
+        // Regula de memorie pentru inițializarea zilei
         if (!storage[zi]) {
           storage[zi] = new Array(functii.length).fill("Din altă subunitate");
         }
