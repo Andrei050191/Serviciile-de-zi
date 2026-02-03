@@ -13,14 +13,13 @@ const db = getFirestore(app);
 const ref = doc(db, "servicii", "calendar");
 
 // --- LOGICA ACCES ---
-const COD_CORECT = "4321"; // MODIFICĂ AICI CODUL DORIT
+const COD_CORECT = "4321"; // PIN-ul tău actualizat
 const loginScreen = document.getElementById('login-screen');
 const mainContent = document.getElementById('main-content');
 const pinInput = document.getElementById('pin-input');
 const loginBtn = document.getElementById('login-btn');
 const errorMsg = document.getElementById('error-msg');
 
-// Verifică dacă a fost deja logat
 if (localStorage.getItem('acces_aprobat') === 'true') {
   afiseazaAplicatia();
 }
@@ -38,7 +37,6 @@ loginBtn.onclick = () => {
 function afiseazaAplicatia() {
   loginScreen.style.display = 'none';
   mainContent.style.display = 'block';
-  // Pornim ascultarea bazei de date doar după login
   onSnapshot(ref, (snap) => {
     const data = snap.exists() ? snap.data().data || {} : {};
     randare(data);
@@ -47,68 +45,24 @@ function afiseazaAplicatia() {
 
 // --- DATE ȘI REGULI ---
 const persoane = [
-  "Din altă subunitate", 
-  "lt.col. Bordea Andrei", 
-  "lt. Bodiu Sergiu", 
-  "lt. Dermindje Mihail", 
-  "lt. Samoschin Anton", 
-  "sg.II Plugaru Iurie", 
-  "sg.III Botnari Anastasia", 
-  "sg.III Murafa Oleg", 
-  "sg.III Ungureanu Andrei", 
-  "sg.III Zamaneagra Aliona", 
-  "cap. Boțoc Dumitru", 
-  "sold.I Răileanu Marina", 
-  "sold.I Rotari Natalia", 
-  "sold.I Smirnov Silvia", 
-  "sold.I Tuceacov Nicolae", 
-  "sold.I Pinzari Vladimir", 
-  "sold.II Cucer Oxana", 
-  "sold.III Roler Ira", 
-  "sold.III Vovc Dan"
+  "Din altă subunitate", "lt.col. Bordea Andrei", "lt. Bodiu Sergiu", "lt. Dermindje Mihail", 
+  "lt. Samoschin Anton", "sg.II Plugaru Iurie", "sg.III Botnari Anastasia", "sg.III Murafa Oleg", 
+  "sg.III Ungureanu Andrei", "sg.III Zamaneagra Aliona", "cap. Boțoc Dumitru", "sold.I Răileanu Marina", 
+  "sold.I Rotari Natalia", "sold.I Smirnov Silvia", "sold.I Tuceacov Nicolae", "sold.I Pinzari Vladimir", 
+  "sold.II Cucer Oxana", "sold.III Roler Ira", "sold.III Vovc Dan"
 ];
 
-const functii = [
-  "Ajutor OSU", 
-  "Sergent de serviciu PCT", 
-  "Planton", "Patrulă", 
-  "Operator radio", 
-  "Intervenția 1", 
-  "Intervenția 2", 
-  "Responsabil"
-];
+const functii = ["Ajutor OSU", "Sergent de serviciu PCT", "Planton", "Patrulă", "Operator radio", "Intervenția 1", "Intervenția 2", "Responsabil"];
 
 const reguliServicii = {
-  "Ajutor OSU": [
-    "lt. Bodiu Sergiu", 
-    "lt. Dermindje Mihail", 
-    "lt. Samoschin Anton"
-  ],
-  "Sergent de serviciu PCT": [
-    "sg.II Plugaru Iurie", 
-    "sg.III Zamaneagra Aliona", 
-    "sg.III Murafa Oleg", 
-    "cap. Boțoc Dumitru", 
-    "sold.I Pinzari Vladimir"
-  ],
-  "Planton": [
-    "sold.II Cucer Oxana", 
-    "sold.III Roler Ira"
-  ],
-  "Patrulă": [
-    "sold.I Tuceacov Nicolae", 
-    "sold.III Vovc Dan"
-  ],
-  "Operator radio": [
-    "sg.III Ungureanu Andrei", 
-    "sg.III Botnari Anastasia", 
-    "sold.I Smirnov Silvia"
-  ],
+  "Ajutor OSU": ["lt. Bodiu Sergiu", "lt. Dermindje Mihail", "lt. Samoschin Anton"],
+  "Sergent de serviciu PCT": ["sg.II Plugaru Iurie", "sg.III Zamaneagra Aliona", "sg.III Murafa Oleg", "cap. Boțoc Dumitru", "sold.I Pinzari Vladimir"],
+  "Planton": ["sold.II Cucer Oxana", "sold.III Roler Ira"],
+  "Patrulă": ["sold.I Tuceacov Nicolae", "sold.III Vovc Dan"],
+  "Operator radio": ["sg.III Ungureanu Andrei", "sg.III Botnari Anastasia", "sold.I Smirnov Silvia"],
   "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
   "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
-  "Responsabil": [
-    "lt.col. Bordea Andrei"
-  ]
+  "Responsabil": ["lt.col. Bordea Andrei"]
 };
 
 function genereazaZile() {
@@ -140,7 +94,6 @@ function randare(storage) {
     const card = document.createElement("div");
     card.className = "card";
     
-    // EXTRAGEM ZIUA SĂPTĂMÂNII
     const parti = zi.split('.');
     const dataObiect = new Date(parti[2], parti[1] - 1, parti[0]);
     const numeZi = dataObiect.toLocaleDateString("ro-RO", { weekday: 'long' });
@@ -165,13 +118,41 @@ function randare(storage) {
         if (p !== "Din altă subunitate") select.add(new Option(p, p));
       });
 
-      select.value = storage?.[zi]?.[indexFunctie] || "Din altă subunitate";
+      const valoareSalvata = storage?.[zi]?.[indexFunctie] || "Din altă subunitate";
+      select.value = valoareSalvata;
 
       select.onchange = () => {
+        const nouaPersoana = select.value;
+
+        // VERIFICARE 2 ZILE LA RÂND (Dacă nu e "Din altă subunitate")
+        if (nouaPersoana !== "Din altă subunitate") {
+          // Calculăm ieri și mâine pentru ziua curentă a cardului
+          const p = zi.split('.');
+          const dCurenta = new Date(p[2], p[1]-1, p[0]);
+          
+          const dIeri = new Date(dCurenta); dIeri.setDate(dIeri.getDate() - 1);
+          const dMaine = new Date(dCurenta); dMaine.setDate(dMaine.getDate() + 1);
+          
+          const sIeri = dIeri.toLocaleDateString("ro-RO");
+          const sMaine = dMaine.toLocaleDateString("ro-RO");
+
+          // Verificăm dacă persoana există în orice funcție ieri sau mâine
+          const verifica = (dataString) => {
+            return storage[dataString] && Object.values(storage[dataString]).includes(nouaPersoana);
+          };
+
+          if (verifica(sIeri) || verifica(sMaine)) {
+            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) în ziua precedentă sau următoare!`);
+            select.value = valoareSalvata; // Resetăm vizual
+            return; // Oprim execuția (nu salvăm)
+          }
+        }
+
+        // SALVARE DACĂ VALIDAREA A TRECUT
         if (!storage[zi]) {
           storage[zi] = new Array(functii.length).fill("Din altă subunitate");
         }
-        storage[zi][indexFunctie] = select.value;
+        storage[zi][indexFunctie] = nouaPersoana;
         salveaza(storage);
       };
 
