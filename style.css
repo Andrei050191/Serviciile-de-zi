@@ -1,0 +1,84 @@
+body {
+  font-family: "Times New Roman", Times, serif;
+  font-weight: bold;
+  background: #f1f5f9;
+  margin: 0;
+  padding: 10px;
+}
+
+
+h1 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 6px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.row span {
+  width: 45%;
+  font-size: 14px;
+}
+
+.row select {
+  width: 55%;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+.card.ieri {
+  border: 2px solid #f87171;
+  background: #fef2f2;
+}
+
+.card.azi {
+  border: 2px solid #22c55e;
+  background: #ecfdf5;
+}
+
+.card.maine {
+  border: 2px solid #60a5fa;
+  background: #eff6ff;
+}
+
+/* FONT + BOLD PENTRU TOT */
+body,
+h1,
+.card,
+.card h2,
+.row span,
+select,
+option {
+  font-family: "Times New Roman", Times, serif;
+  font-weight: bold;
+}
+
+/* asigurare pentru opțiunea selectată */
+select {
+  font-family: "Times New Roman", Times, serif;
+  font-weight: bold;
+}
+
+/* pe unele browsere mobile */
+select option {
+  font-family: "Times New Roman", Times, serif;
+  font-weight: bold;
+}
