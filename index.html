@@ -1,33 +1,14 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Servicii de Zi</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="./style.css">
-
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDapd0bzYlsBHMzqiX9bJzp3CvJfKgAfao",
-      authDomain: "servicii-de-zi.firebaseapp.com",
-      projectId: "servicii-de-zi",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    window.db = getFirestore(app);
-  </script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <h1>📅 Servicii de Zi</h1>
   <div id="cards"></div>
-
-  <!-- JS -->
-  <script type="module" src="./script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
