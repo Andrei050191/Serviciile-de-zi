@@ -66,12 +66,27 @@ const persoane = [
   "sold.II Vovc Dan"
 ];
 
-const functii = ["Ajutor OSU", "Sergent de serviciu PCT", "Planton", "Patrulă", "Operator radio", "Intervenția 1", "Intervenția 2", "Responsabil"];
+const functii = [
+  "Ajutor OSU", 
+  "Sergent de serviciu PCT", 
+  "Planton", "Patrulă", 
+  "Operator radio", 
+  "Intervenția 1", 
+  "Intervenția 2", 
+  "Responsabil"
+];
 
 const reguliServicii = {
-  "Ajutor OSU": ["lt. Bodiu Sergiu", "lt. Dermindje Mihail", "lt. Samoschin Anton"],
-  "Sergent de serviciu PCT": ["sg.II Plugaru Iurie", "sg.III Zamaneagra Aliona", "sg.III Murafa Oleg", "cap. Boțoc Dumitru"
-    
+  "Ajutor OSU": [
+    "lt. Bodiu Sergiu", 
+    "lt. Dermindje Mihail", 
+    "lt. Samoschin Anton"
+  ],
+  "Sergent de serviciu PCT": [
+    "sg.II Plugaru Iurie", 
+    "sg.III Zamaneagra Aliona", 
+    "sg.III Murafa Oleg", 
+    "cap. Boțoc Dumitru"
   ],
   "Planton": [
     "sold.II Cucer Oxana", 
@@ -85,10 +100,14 @@ const reguliServicii = {
   "Operator radio": [
     "sg.III Ungureanu Andrei", 
     "sg.III Botnari Anastasia", 
-    "sold.I Smirnov Silvia"],
+    "sold.I Smirnov Silvia"
+  ],
   "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
   "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
-  "Responsabil": ["lt.col. Bordea Andrei"]
+  
+  "Responsabil": [
+    "lt.col. Bordea Andrei"
+  ]
 };
 
 function genereazaZile() {
