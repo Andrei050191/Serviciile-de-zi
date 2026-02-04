@@ -70,7 +70,8 @@ const persoane = [
 const functii = [
   "Ajutor OSU", 
   "Sergent de serviciu PCT", 
-  "Planton", "Patrulă", 
+  "Planton", 
+  "Patrulă", 
   "Operator radio", 
   "Intervenția 1", 
   "Intervenția 2", 
@@ -78,6 +79,7 @@ const functii = [
 ];
 
 const reguliServicii = {
+  
   "Ajutor OSU": [
     "lt. Bodiu Sergiu", 
     "lt. Dermindje Mihail", 
