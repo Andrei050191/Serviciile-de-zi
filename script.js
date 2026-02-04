@@ -55,7 +55,7 @@ const persoane = [
   "sg.III Murafa Oleg", 
   "sg.III Ungureanu Andrei", 
   "sg.III Zamaneagra Aliona", 
-  "cap. Boțoc Dumitru", 
+  "sg.III Boțoc Dumitru", 
   "sold.I Răileanu Marina", 
   "sold.I Rotari Natalia", 
   "sold.I Smirnov Silvia", 
@@ -89,7 +89,7 @@ const reguliServicii = {
     "sg.II Plugaru Iurie", 
     "sg.III Zamaneagra Aliona", 
     "sg.III Murafa Oleg", 
-    "cap. Boțoc Dumitru"
+    "sg.III Boțoc Dumitru"
   ],
   "Planton": [
     "sold.I Tuceacov Nicolae",
