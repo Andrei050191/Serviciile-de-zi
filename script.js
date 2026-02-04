@@ -61,9 +61,10 @@ const persoane = [
   "sold.I Smirnov Silvia", 
   "sold.I Tuceacov Nicolae", 
   "cap. Pinzari Vladimir", 
-  "sold.II Cucer Oxana", 
-  "sold.III Roler Ira", 
-  "sold.II Vovc Dan"
+  "sold.II Cucer Oxana",
+  "sold.II Vovc Dan", 
+  "sold.III Roler Ira" 
+  
 ];
 
 const functii = [
@@ -89,9 +90,10 @@ const reguliServicii = {
     "cap. Boțoc Dumitru"
   ],
   "Planton": [
+    "sold.I Tuceacov Nicolae",
     "sold.II Cucer Oxana", 
     "sold.III Roler Ira",
-    "sold.III Vovc Dan"
+    "sold.II Vovc Dan"
   ],
   "Patrulă": [
     "sold.I Tuceacov Nicolae", 
@@ -104,7 +106,7 @@ const reguliServicii = {
   ],
   "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
   "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
-  
+
   "Responsabil": [
     "lt.col. Bordea Andrei"
   ]
