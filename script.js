@@ -57,8 +57,8 @@ const reguliServicii = {
   "Planton": ["sold.I Tuceacov Nicolae", "sold.II Cucer Oxana", "sold.III Roler Ira", "sold.II Vovc Dan"],
   "Patrulă": ["sold.I Tuceacov Nicolae", "cap. Pinzari Vladimir"],
   "Operator radio": ["sg.III Ungureanu Andrei", "sg.III Botnari Anastasia", "sold.I Smirnov Silvia"],
-  "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
-  "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
+  "Echipa de intervenţie 1": persoane.filter(p => p !== "Din altă subunitate"),
+  "Echipa de intervenţie 2": persoane.filter(p => p !== "Din altă subunitate"),
   "Responsabil": ["lt.col. Bordea Andrei"]
 };
 
