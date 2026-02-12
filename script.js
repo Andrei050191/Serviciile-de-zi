@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// CONFIGURATIA FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyDapdObzYLSBHMzq9bJzp3CvJfKgAfao",
   authDomain: "servicii-de-zi.firebaseapp.com",
@@ -12,7 +11,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const ref = doc(db, "servicii", "calendar");
 
-// --- LOGICA ACCES ---
 const COD_CORECT = "4321"; 
 const loginScreen = document.getElementById('login-screen');
 const mainContent = document.getElementById('main-content');
@@ -39,12 +37,10 @@ function afiseazaAplicatia() {
   mainContent.style.display = 'block';
   onSnapshot(ref, (snap) => {
     const data = snap.exists() ? snap.data().data || {} : {};
-    console.log("Date primite din Firebase:", data); // Verificăm în consolă
     randare(data);
   });
 }
 
-// --- DATE ȘI REGULI ---
 const persoane = [
   "Din altă subunitate", "lt.col. Bordea Andrei", "lt. Bodiu Sergiu", "lt. Dermindje Mihail", 
   "lt. Samoschin Anton", "sg.II Plugaru Iurie", "sg.III Botnari Anastasia", "sg.III Murafa Oleg", 
@@ -81,12 +77,7 @@ const zileAfisate = genereazaZile();
 const container = document.getElementById("cards");
 
 async function salveaza(toateDatele) {
-  try {
-    await setDoc(ref, { data: toateDatele }, { merge: true });
-    console.log("Salvare reușită!");
-  } catch (e) {
-    console.error("Eroare la salvare:", e);
-  }
+  await setDoc(ref, { data: toateDatele }, { merge: true });
 }
 
 function randare(storage) {
@@ -112,46 +103,33 @@ function randare(storage) {
 
     card.innerHTML = `<h2>📅 ${ziSaptamana}, ${zi}${eticheta}</h2>`;
 
-    // --- LOGICA SWITCH ---
-    // Ne asigurăm că extragem corect proprietatea 'mod' din obiectul zilei
-    const ziData = storage[zi] || {};
-    const modInterventie = ziData.mod || "2"; 
-
+    // --- SWITCH PERSONALIZAT ---
+    const modCurent = storage[zi]?.mod || "2";
     const switchBox = document.createElement("div");
-    switchBox.style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; cursor: pointer; user-select: none;";
+    switchBox.className = "row"; // Folosim clasa row pentru aliniere egala
+    switchBox.style.marginBottom = "15px";
+    
     switchBox.innerHTML = `
-      <span style="font-size: 13px; color: #475569; font-weight: bold;">Echipaj Intervenție:</span>
-      <div style="display: flex; background: #cbd5e1; border-radius: 20px; padding: 2px; position: relative; width: 90px; height: 26px;">
-        <div style="width: 50%; text-align: center; font-size: 11px; z-index: 2; line-height: 26px; color: ${modInterventie === '1' ? 'white' : '#475569'}; transition: 0.3s; font-weight: bold;">1</div>
-        <div style="width: 50%; text-align: center; font-size: 11px; z-index: 2; line-height: 26px; color: ${modInterventie === '2' ? 'white' : '#475569'}; transition: 0.3s; font-weight: bold;">2</div>
-        <div style="position: absolute; top: 2px; left: ${modInterventie === '1' ? '2px' : '44px'}; width: 44px; height: 22px; background: #3b82f6; border-radius: 18px; transition: 0.3s; z-index: 1;"></div>
+      <span style="font-family: 'Times New Roman', serif; font-weight: bold;">Echipaj Interv:</span>
+      <div style="width: 55%; display: flex; background: #cbd5e1; border-radius: 8px; padding: 2px; position: relative; height: 30px; cursor: pointer; user-select: none;">
+        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '1' ? 'white' : '#475569'}; transition: 0.3s;">1 Pers</div>
+        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '2' ? 'white' : '#475569'}; transition: 0.3s;">2 Pers</div>
+        <div style="position: absolute; top: 2px; left: ${modCurent === '1' ? '2px' : 'calc(50% - 0px)'}; width: calc(50% - 2px); height: calc(100% - 4px); background: ${zi === aziStr ? '#22c55e' : '#3b82f6'}; border-radius: 6px; transition: 0.3s; z-index: 1;"></div>
       </div>
     `;
 
     switchBox.onclick = async () => {
-      console.log("Schimbăm modul pentru ziua:", zi);
-      if (!storage[zi]) {
-        storage[zi] = new Array(functii.length).fill("Din altă subunitate");
-      }
-      
-      const actualMod = storage[zi].mod || "2";
-      const noulMod = actualMod === "2" ? "1" : "2";
-      
+      const noulMod = modCurent === "2" ? "1" : "2";
+      if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
       storage[zi].mod = noulMod;
-      if (noulMod === "1") {
-        storage[zi][6] = "Din altă subunitate"; // Ștergem Intervenția 2
-      }
-      
+      if (noulMod === "1") storage[zi][6] = "Din altă subunitate";
       await salveaza(storage);
+      randare(storage); 
     };
     card.appendChild(switchBox);
 
-    // --- RANDARE FUNCTII ---
     functii.forEach((f, indexFunctie) => {
-      // Regula de ascundere: dacă modul e "1" și suntem la indexul funcției Intervenția 2
-      if (modInterventie === "1" && f === "Intervenția 2") {
-        return; 
-      }
+      if (modCurent === "1" && f === "Intervenția 2") return;
 
       const row = document.createElement("div");
       row.className = "row";
@@ -159,10 +137,7 @@ function randare(storage) {
 
       const select = document.createElement("select");
       select.add(new Option("Din altă subunitate", "Din altă subunitate"));
-
-      (reguliServicii[f] || []).forEach(p => {
-        if (p !== "Din altă subunitate") select.add(new Option(p, p));
-      });
+      (reguliServicii[f] || []).forEach(p => { if (p !== "Din altă subunitate") select.add(new Option(p, p)); });
 
       const valoareSalvata = storage?.[zi]?.[indexFunctie] || "Din altă subunitate";
       select.value = valoareSalvata;
@@ -171,23 +146,18 @@ function randare(storage) {
         const nouaPersoana = select.value;
         if (nouaPersoana !== "Din altă subunitate") {
           const serviciiAzi = storage[zi] || [];
-          const esteDejaAzi = serviciiAzi.some((nume, idx) => nume === nouaPersoana && idx !== indexFunctie);
-          if (esteDejaAzi) {
-            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) azi!`);
-            select.value = valoareSalvata;
-            return;
+          if (serviciiAzi.some((nume, idx) => nume === nouaPersoana && idx !== indexFunctie)) {
+            alert(`⚠️ ${nouaPersoana} are deja un serviciu azi!`);
+            select.value = valoareSalvata; return;
           }
           const p = zi.split('.');
-          const dCurenta = new Date(p[2], p[1]-1, p[0]);
-          const dIeri = new Date(dCurenta); dIeri.setDate(dIeri.getDate() - 1);
-          const dMaine = new Date(dCurenta); dMaine.setDate(dMaine.getDate() + 1);
-          const sIeri = dIeri.toLocaleDateString("ro-RO");
-          const sMaine = dMaine.toLocaleDateString("ro-RO");
-          const verificaVecini = (dataString) => storage[dataString] && Object.values(storage[dataString]).includes(nouaPersoana);
-          if (verificaVecini(sIeri) || verificaVecini(sMaine)) {
-            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) ieri sau mâine!`);
-            select.value = valoareSalvata;
-            return;
+          const dC = new Date(p[2], p[1]-1, p[0]);
+          const sIeri = new Date(dC.getTime() - 86400000).toLocaleDateString("ro-RO");
+          const sMaine = new Date(dC.getTime() + 86400000).toLocaleDateString("ro-RO");
+          const verifica = (ds) => storage[ds] && Object.values(storage[ds]).includes(nouaPersoana);
+          if (verifica(sIeri) || verifica(sMaine)) {
+            alert(`⚠️ ${nouaPersoana} este planificat(ă) ieri sau mâine!`);
+            select.value = valoareSalvata; return;
           }
         }
         if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
