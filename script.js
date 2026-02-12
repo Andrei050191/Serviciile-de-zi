@@ -106,30 +106,37 @@ function randare(storage) {
 
     card.innerHTML = `<h2>📅 ${ziSaptamana}, ${zi}${eticheta}</h2>`;
 
-    // --- SWITCH MOD INTERVENȚIE ---
-    const modInterventie = storage[zi]?.mod || "2"; // Default 2 persoane
+    // --- LOGICA SWITCH MOD ---
+    const modInterventie = storage[zi]?.mod || "2"; 
     const switchBox = document.createElement("div");
-    switchBox.style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; cursor: pointer;";
+    switchBox.style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; cursor: pointer; user-select: none;";
     switchBox.innerHTML = `
-      <span style="font-size: 13px; color: #475569;">Echipaj Intervenție:</span>
-      <div style="display: flex; background: #cbd5e1; border-radius: 20px; padding: 2px; position: relative; width: 90px; height: 24px;">
-        <div style="width: 50%; text-align: center; font-size: 11px; z-index: 2; line-height: 24px; color: ${modInterventie === '1' ? 'white' : '#475569'}; transition: 0.3s;">1</div>
-        <div style="width: 50%; text-align: center; font-size: 11px; z-index: 2; line-height: 24px; color: ${modInterventie === '2' ? 'white' : '#475569'}; transition: 0.3s;">2</div>
-        <div style="position: absolute; top: 2px; left: ${modInterventie === '1' ? '2px' : '44px'}; width: 44px; height: 20px; background: #3b82f6; border-radius: 18px; transition: 0.3s; z-index: 1;"></div>
+      <span style="font-size: 13px; color: #475569; font-weight: bold;">Echipaj Intervenție:</span>
+      <div style="display: flex; background: #cbd5e1; border-radius: 20px; padding: 2px; position: relative; width: 90px; height: 26px;">
+        <div style="width: 50%; text-align: center; font-size: 11px; z-index: 2; line-height: 26px; color: ${modInterventie === '1' ? 'white' : '#475569'}; transition: 0.3s; font-weight: bold;">1</div>
+        <div style="width: 50%; text-align: center; font-size: 11px; z-index: 2; line-height: 26px; color: ${modInterventie === '2' ? 'white' : '#475569'}; transition: 0.3s; font-weight: bold;">2</div>
+        <div style="position: absolute; top: 2px; left: ${modInterventie === '1' ? '2px' : '44px'}; width: 44px; height: 22px; background: #3b82f6; border-radius: 18px; transition: 0.3s; z-index: 1;"></div>
       </div>
     `;
+
     switchBox.onclick = async () => {
+      if (!storage[zi]) {
+        storage[zi] = new Array(functii.length).fill("Din altă subunitate");
+      }
       const noulMod = modInterventie === "2" ? "1" : "2";
-      if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
       storage[zi].mod = noulMod;
-      if (noulMod === "1") storage[zi][6] = "Din altă subunitate"; // Curăță Intervenția 2
+      
+      // Dacă e mod 1, forțăm Intervenția 2 să fie resetată
+      if (noulMod === "1") {
+        storage[zi][6] = "Din altă subunitate";
+      }
+      
       await salveaza(storage);
     };
     card.appendChild(switchBox);
 
-    // --- FUNCTII ---
+    // --- RANDARE FUNCTII ---
     functii.forEach((f, indexFunctie) => {
-      // ASCUNDE INTERVENȚIA 2 DACĂ MODUL ESTE "1"
       if (modInterventie === "1" && f === "Intervenția 2") return;
 
       const row = document.createElement("div");
@@ -150,7 +157,6 @@ function randare(storage) {
         const nouaPersoana = select.value;
 
         if (nouaPersoana !== "Din altă subunitate") {
-          // Validare aceeași zi
           const serviciiAzi = storage[zi] || [];
           const esteDejaAzi = serviciiAzi.some((nume, idx) => nume === nouaPersoana && idx !== indexFunctie);
           if (esteDejaAzi) {
@@ -159,7 +165,6 @@ function randare(storage) {
             return;
           }
 
-          // Validare ieri/mâine
           const p = zi.split('.');
           const dCurenta = new Date(p[2], p[1]-1, p[0]);
           const dIeri = new Date(dCurenta); dIeri.setDate(dIeri.getDate() - 1);
