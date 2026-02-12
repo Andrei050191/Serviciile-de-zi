@@ -39,6 +39,7 @@ function afiseazaAplicatia() {
   mainContent.style.display = 'block';
   onSnapshot(ref, (snap) => {
     const data = snap.exists() ? snap.data().data || {} : {};
+    console.log("Date primite din Firebase:", data); // Verificăm în consolă
     randare(data);
   });
 }
@@ -80,7 +81,12 @@ const zileAfisate = genereazaZile();
 const container = document.getElementById("cards");
 
 async function salveaza(toateDatele) {
-  await setDoc(ref, { data: toateDatele }, { merge: true });
+  try {
+    await setDoc(ref, { data: toateDatele }, { merge: true });
+    console.log("Salvare reușită!");
+  } catch (e) {
+    console.error("Eroare la salvare:", e);
+  }
 }
 
 function randare(storage) {
@@ -106,8 +112,11 @@ function randare(storage) {
 
     card.innerHTML = `<h2>📅 ${ziSaptamana}, ${zi}${eticheta}</h2>`;
 
-    // --- LOGICA SWITCH MOD ---
-    const modInterventie = storage[zi]?.mod || "2"; 
+    // --- LOGICA SWITCH ---
+    // Ne asigurăm că extragem corect proprietatea 'mod' din obiectul zilei
+    const ziData = storage[zi] || {};
+    const modInterventie = ziData.mod || "2"; 
+
     const switchBox = document.createElement("div");
     switchBox.style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; cursor: pointer; user-select: none;";
     switchBox.innerHTML = `
@@ -120,15 +129,17 @@ function randare(storage) {
     `;
 
     switchBox.onclick = async () => {
+      console.log("Schimbăm modul pentru ziua:", zi);
       if (!storage[zi]) {
         storage[zi] = new Array(functii.length).fill("Din altă subunitate");
       }
-      const noulMod = modInterventie === "2" ? "1" : "2";
-      storage[zi].mod = noulMod;
       
-      // Dacă e mod 1, forțăm Intervenția 2 să fie resetată
+      const actualMod = storage[zi].mod || "2";
+      const noulMod = actualMod === "2" ? "1" : "2";
+      
+      storage[zi].mod = noulMod;
       if (noulMod === "1") {
-        storage[zi][6] = "Din altă subunitate";
+        storage[zi][6] = "Din altă subunitate"; // Ștergem Intervenția 2
       }
       
       await salveaza(storage);
@@ -137,7 +148,10 @@ function randare(storage) {
 
     // --- RANDARE FUNCTII ---
     functii.forEach((f, indexFunctie) => {
-      if (modInterventie === "1" && f === "Intervenția 2") return;
+      // Regula de ascundere: dacă modul e "1" și suntem la indexul funcției Intervenția 2
+      if (modInterventie === "1" && f === "Intervenția 2") {
+        return; 
+      }
 
       const row = document.createElement("div");
       row.className = "row";
@@ -155,7 +169,6 @@ function randare(storage) {
 
       select.onchange = async () => {
         const nouaPersoana = select.value;
-
         if (nouaPersoana !== "Din altă subunitate") {
           const serviciiAzi = storage[zi] || [];
           const esteDejaAzi = serviciiAzi.some((nume, idx) => nume === nouaPersoana && idx !== indexFunctie);
@@ -164,23 +177,19 @@ function randare(storage) {
             select.value = valoareSalvata;
             return;
           }
-
           const p = zi.split('.');
           const dCurenta = new Date(p[2], p[1]-1, p[0]);
           const dIeri = new Date(dCurenta); dIeri.setDate(dIeri.getDate() - 1);
           const dMaine = new Date(dCurenta); dMaine.setDate(dMaine.getDate() + 1);
           const sIeri = dIeri.toLocaleDateString("ro-RO");
           const sMaine = dMaine.toLocaleDateString("ro-RO");
-
           const verificaVecini = (dataString) => storage[dataString] && Object.values(storage[dataString]).includes(nouaPersoana);
-
           if (verificaVecini(sIeri) || verificaVecini(sMaine)) {
             alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) ieri sau mâine!`);
             select.value = valoareSalvata;
             return;
           }
         }
-
         if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
         storage[zi][indexFunctie] = nouaPersoana;
         await salveaza(storage);
