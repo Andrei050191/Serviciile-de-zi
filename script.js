@@ -110,7 +110,7 @@ function randare(storage) {
     switchBox.style.marginBottom = "15px";
     
     switchBox.innerHTML = `
-      <span style="font-family: 'Times New Roman', serif; font-weight: bold;">Echipaj Interv:</span>
+      <span style="font-family: 'Times New Roman', serif; font-weight: bold;">Componenţa echipei de intervenţie:</span>
       <div style="width: 55%; display: flex; background: #cbd5e1; border-radius: 8px; padding: 2px; position: relative; height: 30px; cursor: pointer; user-select: none;">
         <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '1' ? 'white' : '#475569'}; transition: 0.3s;">1 Pers</div>
         <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '2' ? 'white' : '#475569'}; transition: 0.3s;">2 Pers</div>
