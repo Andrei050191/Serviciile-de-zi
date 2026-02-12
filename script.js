@@ -77,7 +77,8 @@ const zileAfisate = genereazaZile();
 const container = document.getElementById("cards");
 
 async function salveaza(toateDatele) {
-  await setDoc(ref, { data: toateDatele }, { merge: true });
+  // Conversie pentru a asigura formatul JSON curat înainte de trimitere
+  await setDoc(ref, { data: JSON.parse(JSON.stringify(toateDatele)) }, { merge: true });
 }
 
 function randare(storage) {
@@ -91,40 +92,50 @@ function randare(storage) {
     const card = document.createElement("div");
     card.className = "card";
     
+    // Inițializare structură de date sigură (Obiect în loc de Array)
+    if (!storage[zi] || Array.isArray(storage[zi])) {
+      const dateVechi = Array.isArray(storage[zi]) ? storage[zi] : [];
+      storage[zi] = {
+        oameni: dateVechi.length ? dateVechi : new Array(functii.length).fill("Din altă subunitate"),
+        mod: "2"
+      };
+    }
+
+    const modCurent = storage[zi].mod || "2";
+    const oameniZi = storage[zi].oameni;
+
     const parti = zi.split('.');
     const dataObiect = new Date(parti[2], parti[1] - 1, parti[0]);
     const numeZi = dataObiect.toLocaleDateString("ro-RO", { weekday: 'long' });
     const ziSaptamana = numeZi.charAt(0).toUpperCase() + numeZi.slice(1);
 
     let eticheta = "";
+    let culoareAccent = "#3b82f6";
     if (zi === ieriStr) { card.classList.add("ieri"); eticheta = " (IERI)"; }
-    else if (zi === aziStr) { card.classList.add("azi"); eticheta = " (AZI)"; }
+    else if (zi === aziStr) { card.classList.add("azi"); eticheta = " (AZI)"; culoareAccent = "#22c55e"; }
     else if (zi === maineStr) { card.classList.add("maine"); eticheta = " (MÂINE)"; }
 
     card.innerHTML = `<h2>📅 ${ziSaptamana}, ${zi}${eticheta}</h2>`;
 
     // --- SWITCH PERSONALIZAT ---
-    const modCurent = storage[zi]?.mod || "2";
     const switchBox = document.createElement("div");
-    switchBox.className = "row"; // Folosim clasa row pentru aliniere egala
+    switchBox.className = "row";
     switchBox.style.marginBottom = "15px";
     
     switchBox.innerHTML = `
-      <span style="font-family: 'Times New Roman', serif; font-weight: bold;">Componenţa echipei de intervenţie:</span>
+      <span style="font-family: 'Times New Roman', serif; font-weight: bold;">Echipaj Interv:</span>
       <div style="width: 55%; display: flex; background: #cbd5e1; border-radius: 8px; padding: 2px; position: relative; height: 30px; cursor: pointer; user-select: none;">
-        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '1' ? 'white' : '#475569'}; transition: 0.3s;">1 Persoană</div>
-        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '2' ? 'white' : '#475569'}; transition: 0.3s;">2 Persoane</div>
-        <div style="position: absolute; top: 2px; left: ${modCurent === '1' ? '2px' : 'calc(50% - 0px)'}; width: calc(50% - 2px); height: calc(100% - 4px); background: ${zi === aziStr ? '#22c55e' : '#3b82f6'}; border-radius: 6px; transition: 0.3s; z-index: 1;"></div>
+        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '1' ? 'white' : '#475569'}; transition: 0.3s;">1 Pers</div>
+        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '2' ? 'white' : '#475569'}; transition: 0.3s;">2 Pers</div>
+        <div style="position: absolute; top: 2px; left: ${modCurent === '1' ? '2px' : '50%'}; width: calc(50% - 2px); height: calc(100% - 4px); background: ${culoareAccent}; border-radius: 6px; transition: 0.3s; z-index: 1;"></div>
       </div>
     `;
 
     switchBox.onclick = async () => {
       const noulMod = modCurent === "2" ? "1" : "2";
-      if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
       storage[zi].mod = noulMod;
-      if (noulMod === "1") storage[zi][6] = "Din altă subunitate";
+      if (noulMod === "1") storage[zi].oameni[6] = "Din altă subunitate";
       await salveaza(storage);
-      randare(storage); 
     };
     card.appendChild(switchBox);
 
@@ -139,14 +150,13 @@ function randare(storage) {
       select.add(new Option("Din altă subunitate", "Din altă subunitate"));
       (reguliServicii[f] || []).forEach(p => { if (p !== "Din altă subunitate") select.add(new Option(p, p)); });
 
-      const valoareSalvata = storage?.[zi]?.[indexFunctie] || "Din altă subunitate";
+      const valoareSalvata = oameniZi[indexFunctie] || "Din altă subunitate";
       select.value = valoareSalvata;
 
       select.onchange = async () => {
         const nouaPersoana = select.value;
         if (nouaPersoana !== "Din altă subunitate") {
-          const serviciiAzi = storage[zi] || [];
-          if (serviciiAzi.some((nume, idx) => nume === nouaPersoana && idx !== indexFunctie)) {
+          if (oameniZi.some((nume, idx) => nume === nouaPersoana && idx !== indexFunctie)) {
             alert(`⚠️ ${nouaPersoana} are deja un serviciu azi!`);
             select.value = valoareSalvata; return;
           }
@@ -154,14 +164,15 @@ function randare(storage) {
           const dC = new Date(p[2], p[1]-1, p[0]);
           const sIeri = new Date(dC.getTime() - 86400000).toLocaleDateString("ro-RO");
           const sMaine = new Date(dC.getTime() + 86400000).toLocaleDateString("ro-RO");
-          const verifica = (ds) => storage[ds] && Object.values(storage[ds]).includes(nouaPersoana);
-          if (verifica(sIeri) || verifica(sMaine)) {
+          
+          const verificaVecini = (ds) => storage[ds] && storage[ds].oameni && storage[ds].oameni.includes(nouaPersoana);
+          
+          if (verificaVecini(sIeri) || verificaVecini(sMaine)) {
             alert(`⚠️ ${nouaPersoana} este planificat(ă) ieri sau mâine!`);
             select.value = valoareSalvata; return;
           }
         }
-        if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
-        storage[zi][indexFunctie] = nouaPersoana;
+        storage[zi].oameni[indexFunctie] = nouaPersoana;
         await salveaza(storage);
       };
 
