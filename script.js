@@ -45,73 +45,24 @@ function afiseazaAplicatia() {
 
 // --- DATE ȘI REGULI ---
 const persoane = [
-  "Din altă subunitate", 
-  "lt.col. Bordea Andrei", 
-  "lt. Bodiu Sergiu", 
-  "lt. Dermindje Mihail", 
-  "lt. Samoschin Anton", 
-  "sg.II Plugaru Iurie", 
-  "sg.III Botnari Anastasia", 
-  "sg.III Murafa Oleg", 
-  "sg.III Ungureanu Andrei", 
-  "sg.III Zamaneagra Aliona", 
-  "sg.III Boțoc Dumitru", 
-  "sold.I Răileanu Marina", 
-  "sold.I Rotari Natalia", 
-  "sold.I Smirnov Silvia", 
-  "sold.I Tuceacov Nicolae", 
-  "cap. Pinzari Vladimir", 
-  "sold.II Cucer Oxana",
-  "sold.II Vovc Dan", 
-  "sold.III Roler Ira" 
-  
+  "Din altă subunitate", "lt.col. Bordea Andrei", "lt. Bodiu Sergiu", "lt. Dermindje Mihail", 
+  "lt. Samoschin Anton", "sg.II Plugaru Iurie", "sg.III Botnari Anastasia", "sg.III Murafa Oleg", 
+  "sg.III Ungureanu Andrei", "sg.III Zamaneagra Aliona", "sg.III Boțoc Dumitru", "sold.I Răileanu Marina", 
+  "sold.I Rotari Natalia", "sold.I Smirnov Silvia", "sold.I Tuceacov Nicolae", "cap. Pinzari Vladimir", 
+  "sold.II Cucer Oxana", "sold.II Vovc Dan", "sold.III Roler Ira" 
 ];
 
-const functii = [
-  "Ajutor OSU", 
-  "Sergent de serviciu PCT", 
-  "Planton", 
-  "Patrulă", 
-  "Operator radio", 
-  "Intervenția 1", 
-  "Intervenția 2", 
-  "Responsabil"
-];
+const functii = ["Ajutor OSU", "Sergent de serviciu PCT", "Planton", "Patrulă", "Operator radio", "Intervenția 1", "Intervenția 2", "Responsabil"];
 
 const reguliServicii = {
-  
-  "Ajutor OSU": [
-    "lt. Bodiu Sergiu", 
-    "lt. Dermindje Mihail", 
-    "lt. Samoschin Anton"
-  ],
-  "Sergent de serviciu PCT": [
-    "sg.II Plugaru Iurie", 
-    "sg.III Zamaneagra Aliona", 
-    "sg.III Murafa Oleg", 
-    "sg.III Boțoc Dumitru"
-  ],
-  "Planton": [
-    "sold.I Tuceacov Nicolae",
-    "sold.II Cucer Oxana", 
-    "sold.III Roler Ira",
-    "sold.II Vovc Dan"
-  ],
-  "Patrulă": [
-    "sold.I Tuceacov Nicolae", 
-    "cap. Pinzari Vladimir"
-  ],
-  "Operator radio": [
-    "sg.III Ungureanu Andrei", 
-    "sg.III Botnari Anastasia", 
-    "sold.I Smirnov Silvia"
-  ],
+  "Ajutor OSU": ["lt. Bodiu Sergiu", "lt. Dermindje Mihail", "lt. Samoschin Anton"],
+  "Sergent de serviciu PCT": ["sg.II Plugaru Iurie", "sg.III Zamaneagra Aliona", "sg.III Murafa Oleg", "sg.III Boțoc Dumitru"],
+  "Planton": ["sold.I Tuceacov Nicolae", "sold.II Cucer Oxana", "sold.III Roler Ira", "sold.II Vovc Dan"],
+  "Patrulă": ["sold.I Tuceacov Nicolae", "cap. Pinzari Vladimir"],
+  "Operator radio": ["sg.III Ungureanu Andrei", "sg.III Botnari Anastasia", "sold.I Smirnov Silvia"],
   "Intervenția 1": persoane.filter(p => p !== "Din altă subunitate"),
   "Intervenția 2": persoane.filter(p => p !== "Din altă subunitate"),
-
-  "Responsabil": [
-    "lt.col. Bordea Andrei"
-  ]
+  "Responsabil": ["lt.col. Bordea Andrei"]
 };
 
 function genereazaZile() {
@@ -155,7 +106,32 @@ function randare(storage) {
 
     card.innerHTML = `<h2>📅 ${ziSaptamana}, ${zi}${eticheta}</h2>`;
 
+    // --- SWITCH MOD INTERVENȚIE ---
+    const modInterventie = storage[zi]?.mod || "2"; // Default 2 persoane
+    const switchBox = document.createElement("div");
+    switchBox.style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; cursor: pointer;";
+    switchBox.innerHTML = `
+      <span style="font-size: 13px; color: #475569;">Echipaj Intervenție:</span>
+      <div style="display: flex; background: #cbd5e1; border-radius: 20px; padding: 2px; position: relative; width: 90px; height: 24px;">
+        <div style="width: 50%; text-align: center; font-size: 11px; z-index: 2; line-height: 24px; color: ${modInterventie === '1' ? 'white' : '#475569'}; transition: 0.3s;">1</div>
+        <div style="width: 50%; text-align: center; font-size: 11px; z-index: 2; line-height: 24px; color: ${modInterventie === '2' ? 'white' : '#475569'}; transition: 0.3s;">2</div>
+        <div style="position: absolute; top: 2px; left: ${modInterventie === '1' ? '2px' : '44px'}; width: 44px; height: 20px; background: #3b82f6; border-radius: 18px; transition: 0.3s; z-index: 1;"></div>
+      </div>
+    `;
+    switchBox.onclick = async () => {
+      const noulMod = modInterventie === "2" ? "1" : "2";
+      if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
+      storage[zi].mod = noulMod;
+      if (noulMod === "1") storage[zi][6] = "Din altă subunitate"; // Curăță Intervenția 2
+      await salveaza(storage);
+    };
+    card.appendChild(switchBox);
+
+    // --- FUNCTII ---
     functii.forEach((f, indexFunctie) => {
+      // ASCUNDE INTERVENȚIA 2 DACĂ MODUL ESTE "1"
+      if (modInterventie === "1" && f === "Intervenția 2") return;
+
       const row = document.createElement("div");
       row.className = "row";
       row.innerHTML = `<span>${f}</span>`;
@@ -170,23 +146,20 @@ function randare(storage) {
       const valoareSalvata = storage?.[zi]?.[indexFunctie] || "Din altă subunitate";
       select.value = valoareSalvata;
 
-      select.onchange = () => {
+      select.onchange = async () => {
         const nouaPersoana = select.value;
 
         if (nouaPersoana !== "Din altă subunitate") {
-          
-          // 1. VERIFICARE: SĂ NU FIE DEJA ÎN ALT SERVICIU ÎN ACEEAȘI ZI
+          // Validare aceeași zi
           const serviciiAzi = storage[zi] || [];
-          // Verificăm dacă persoana există deja în alt index din array-ul zilei respective
           const esteDejaAzi = serviciiAzi.some((nume, idx) => nume === nouaPersoana && idx !== indexFunctie);
-
           if (esteDejaAzi) {
-            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) la alt serviciu în această zi!`);
+            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) azi!`);
             select.value = valoareSalvata;
             return;
           }
 
-          // 2. VERIFICARE: SĂ NU FIE 2 ZILE LA RÂND
+          // Validare ieri/mâine
           const p = zi.split('.');
           const dCurenta = new Date(p[2], p[1]-1, p[0]);
           const dIeri = new Date(dCurenta); dIeri.setDate(dIeri.getDate() - 1);
@@ -194,23 +167,18 @@ function randare(storage) {
           const sIeri = dIeri.toLocaleDateString("ro-RO");
           const sMaine = dMaine.toLocaleDateString("ro-RO");
 
-          const verificaVecini = (dataString) => {
-            return storage[dataString] && Object.values(storage[dataString]).includes(nouaPersoana);
-          };
+          const verificaVecini = (dataString) => storage[dataString] && Object.values(storage[dataString]).includes(nouaPersoana);
 
           if (verificaVecini(sIeri) || verificaVecini(sMaine)) {
-            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) în ziua precedentă sau următoare!`);
+            alert(`⚠️ Eroare: ${nouaPersoana} este deja planificat(ă) ieri sau mâine!`);
             select.value = valoareSalvata;
             return;
           }
         }
 
-        // SALVARE
-        if (!storage[zi]) {
-          storage[zi] = new Array(functii.length).fill("Din altă subunitate");
-        }
+        if (!storage[zi]) storage[zi] = new Array(functii.length).fill("Din altă subunitate");
         storage[zi][indexFunctie] = nouaPersoana;
-        salveaza(storage);
+        await salveaza(storage);
       };
 
       row.appendChild(select);
