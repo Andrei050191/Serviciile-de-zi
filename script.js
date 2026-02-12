@@ -112,8 +112,8 @@ function randare(storage) {
     switchBox.innerHTML = `
       <span style="font-family: 'Times New Roman', serif; font-weight: bold;">Componenţa echipei de intervenţie:</span>
       <div style="width: 55%; display: flex; background: #cbd5e1; border-radius: 8px; padding: 2px; position: relative; height: 30px; cursor: pointer; user-select: none;">
-        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '1' ? 'white' : '#475569'}; transition: 0.3s;">1 Pers</div>
-        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '2' ? 'white' : '#475569'}; transition: 0.3s;">2 Pers</div>
+        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '1' ? 'white' : '#475569'}; transition: 0.3s;">1 Persoană</div>
+        <div style="width: 50%; text-align: center; line-height: 30px; z-index: 2; font-size: 14px; font-family: 'Times New Roman', serif; font-weight: bold; color: ${modCurent === '2' ? 'white' : '#475569'}; transition: 0.3s;">2 Persoane</div>
         <div style="position: absolute; top: 2px; left: ${modCurent === '1' ? '2px' : 'calc(50% - 0px)'}; width: calc(50% - 2px); height: calc(100% - 4px); background: ${zi === aziStr ? '#22c55e' : '#3b82f6'}; border-radius: 6px; transition: 0.3s; z-index: 1;"></div>
       </div>
     `;
